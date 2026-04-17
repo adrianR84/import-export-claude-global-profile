@@ -125,8 +125,6 @@ Restore settings from the backup folder to `~/.claude/`. Optionally pull from Gi
 bash ~/.claude/skills/import-export-claude-global-profile/scripts/import.sh [merge|clean]
 ```
 
-Existing `~/.claude/` files are renamed to `.backup` before being overwritten.
-
 **Sync modes:** same as export — `merge` (default) or `clean`.
 
 **After import:** run `/reload-plugins` in Claude Code to load restored plugins.
@@ -187,6 +185,5 @@ Plugin files (`installed_plugins.json`, `known_marketplaces.json`) store absolut
 
 ## File safety
 
-- Import overwrites are preceded by automatic `.backup` suffix renames
 - Merge mode never deletes items — only adds/updates from source
 - Clean mode is the only destructive option — it removes items not present in source

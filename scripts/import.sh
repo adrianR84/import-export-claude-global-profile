@@ -41,33 +41,7 @@ elif [ -n "$GITHUB_REPO" ] && [ ! -d "$SRC/.git" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Backup existing files in ~/.claude/ (only files, not folders)
-# ---------------------------------------------------------------------------
-echo ""
-echo "Backing up existing files..."
-
-for file in $FILES; do
-  dst_file="$DST/$file"
-
-  if [ -f "$dst_file" ]; then
-    cp "$dst_file" "${dst_file}.backup"
-    echo "  Backed up: $file -> $file.backup"
-  fi
-done
-
-# Backup plugin files
-for file in $PLUGIN_FILES; do
-  dst_file="$DST/plugins/$file"
-
-  if [ -f "$dst_file" ]; then
-    mkdir -p "$DST/plugins"
-    cp "$dst_file" "${dst_file}.backup"
-    echo "  Backed up: plugins/$file -> plugins/$file.backup"
-  fi
-done
-
-# ---------------------------------------------------------------------------
-# 3. Sync folders
+# 2. Sync folders
 # ---------------------------------------------------------------------------
 echo ""
 echo "Syncing folders ($MODE mode)..."
@@ -100,7 +74,7 @@ for folder in $FOLDERS; do
 done
 
 # ---------------------------------------------------------------------------
-# 4. Restore individual files
+# 3. Restore individual files
 # ---------------------------------------------------------------------------
 echo ""
 echo "Restoring files ($MODE mode)..."
@@ -140,7 +114,7 @@ for file in $PLUGIN_FILES; do
 done
 
 # ---------------------------------------------------------------------------
-# 5. Sanitize plugin JSON files (convert relative → absolute paths)
+# 4. Sanitize plugin JSON files (convert relative → absolute paths)
 # ---------------------------------------------------------------------------
 echo "Sanitizing plugin files (import mode)..."
 SANITIZE_SCRIPT="$SCRIPT_DIR/sanitize-json.js"
@@ -153,7 +127,7 @@ for file in $PLUGIN_FILES; do
 done
 
 # ---------------------------------------------------------------------------
-# 6. Summary
+# 5. Summary
 # ---------------------------------------------------------------------------
 echo ""
 echo "Done. Sync mode: $MODE"
