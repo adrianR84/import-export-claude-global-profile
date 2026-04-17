@@ -18,7 +18,7 @@ Backup, restore, and compare your Claude Code global settings — fully local or
 
 ```bash
 # Clone or copy the skill directory into ~/.claude/skills/
-git clone <your-repo-url> ~/.claude/skills/import-export-claude-global-profile
+git clone https://github.com/adrianR84/import-export-claude-global-profile ~/.claude/skills/import-export-claude-global-profile
 ```
 
 **2. (Optional) Configure the skill:**
