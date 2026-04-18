@@ -27,14 +27,16 @@ parse_yaml_config() {
 
     # Remove inline comments (but not inside quoted values)
     in_comment=0
-    for ((i=0; i<${#line}; i++)); do
-      local ch="${line:i:1}"
+    i=0
+    while [ $i -lt ${#line} ]; do
+      ch="${line:i:1}"
       if [[ "$ch" == "'" ]] || [[ "$ch" == '"' ]]; then
         in_comment=$((1 - in_comment))
-      elif [[ "$ch" == "#" ]] && ((in_comment == 0)); then
+      elif [[ "$ch" == "#" ]] && [ $in_comment -eq 0 ]; then
         line="${line:0:i}"
         break
       fi
+      i=$((i + 1))
     done
 
     # Trim trailing whitespace after comment strip
@@ -57,7 +59,7 @@ parse_yaml_config() {
 
       case "$key" in
         backup_folder)
-          BACKUP_FOLDER="${value/\~/$HOME}"
+          BACKUP_FOLDER="${value//\~/$HOME}"
           ;;
         github_repo)
           GITHUB_REPO="$value"

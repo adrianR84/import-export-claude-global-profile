@@ -40,19 +40,19 @@ compare_file() {
   if [ -f "$src" ] && [ -f "$dst" ]; then
     if diff -q "$src" "$dst" > /dev/null 2>&1; then
       echo -e "  ${GREEN}✓${NC} $rel"
-      ((count_same++))
+      count_same=$((count_same + 1))
     else
       echo -e "  ${RED}≠${NC} $rel"
-      ((count_diff++))
+      count_diff=$((count_diff + 1))
       diff_details+=("≠ $rel")
     fi
   elif [ -f "$src" ]; then
     echo -e "  ${YELLOW}→${NC} $rel  (source only)"
-    ((count_src_only++))
+    count_src_only=$((count_src_only + 1))
     diff_details+=("→ $rel")
   elif [ -f "$dst" ]; then
     echo -e "  ${YELLOW}←${NC} $rel  (backup only)"
-    ((count_dst_only++))
+    count_dst_only=$((count_dst_only + 1))
     diff_details+=("← $rel")
   fi
 }
@@ -74,14 +74,14 @@ compare_folder() {
 
   if [ ! -d "$src" ]; then
     echo -e "      ${YELLOW}← entire folder (backup only)${NC}"
-    ((count_dst_only++))
+    count_dst_only=$((count_dst_only + 1))
     diff_details+=("← $folder/")
     return
   fi
 
   if [ ! -d "$dst" ]; then
     echo -e "      ${YELLOW}→ entire folder (source only)${NC}"
-    ((count_src_only++))
+    count_src_only=$((count_src_only + 1))
     diff_details+=("→ $folder/")
     return
   fi
@@ -93,7 +93,7 @@ compare_folder() {
 
   if [ ${#lines[@]} -eq 0 ]; then
     echo -e "      ${GREEN}✓ (identical)${NC}"
-    ((count_same++))
+    count_same=$((count_same + 1))
     return
   fi
 
@@ -106,7 +106,7 @@ compare_folder() {
       depth=$(tr -cd '/' <<< "$rel" | wc -c)
       [ "$depth" -le 2 ] || continue
       echo -e "      ${RED}≠${NC} $rel"
-      ((count_diff++))
+      count_diff=$((count_diff + 1))
       diff_details+=("≠ $folder/$rel")
 
     elif [[ "$line" == Only\ in\ ${src}* ]]; then
@@ -122,7 +122,7 @@ compare_folder() {
       local icon=""
       [ -d "$dir/$name" ] && icon="📁 "
       echo -e "      ${YELLOW}→${NC} ${icon}${full_rel}"
-      ((count_src_only++))
+      count_src_only=$((count_src_only + 1))
       diff_details+=("→ $folder/$full_rel")
 
     elif [[ "$line" == Only\ in\ ${dst}* ]]; then
@@ -138,7 +138,7 @@ compare_folder() {
       local icon=""
       [ -d "$dir/$name" ] && icon="📁 "
       echo -e "      ${YELLOW}←${NC} ${icon}${full_rel}"
-      ((count_dst_only++))
+      count_dst_only=$((count_dst_only + 1))
       diff_details+=("← $folder/$full_rel")
     fi
   done
