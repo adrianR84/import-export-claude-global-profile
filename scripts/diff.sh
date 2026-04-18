@@ -86,7 +86,10 @@ compare_folder() {
     return
   fi
 
-  mapfile -t lines < <(diff -rq "$src" "$dst" 2>/dev/null)
+  lines=()
+  while IFS= read -r line; do
+    lines+=("$line")
+  done < <(diff -rq "$src" "$dst" 2>/dev/null)
 
   if [ ${#lines[@]} -eq 0 ]; then
     echo -e "      ${GREEN}✓ (identical)${NC}"
