@@ -86,21 +86,17 @@ compare_folder() {
     return
   fi
 
-  lines=()
   tmp=$(mktemp)
   diff -rq "$src" "$dst" 2>/dev/null > "$tmp"
-  while IFS= read -r line; do
-    lines+=("$line")
-  done < "$tmp"
-  rm -f "$tmp"
 
-  if [ ${#lines[@]} -eq 0 ]; then
+  if [ ! -s "$tmp" ]; then
     echo -e "      ${GREEN}✓ (identical)${NC}"
     count_same=$((count_same + 1))
+    rm -f "$tmp"
     return
   fi
 
-  for line in "${lines[@]}"; do
+  while IFS= read -r line; do
     case "$line" in
       "Files "*)
         rest="${line#Files }"
@@ -143,7 +139,8 @@ compare_folder() {
         diff_details="${diff_details}${diff_details:+$'\n'}← $folder/$full_rel"
         ;;
     esac
-  done
+  done < "$tmp"
+  rm -f "$tmp"
 }
 
 # ─────────────────────────────────────────────────────────────────

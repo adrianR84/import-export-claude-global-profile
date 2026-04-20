@@ -41,7 +41,9 @@ files: settings.json AGENTS.md CLAUDE.md
 
 **Always tell the user this at the start of the conversation:**
 
-> This skill is configurable. All settings — backup folder, GitHub repo, and what to sync — are in `~/.claude/skills/import-export-claude-global-profile/config.yml`. You can customize any of them. Would you like to review or change any settings before we proceed?
+> This skill is configurable. All settings — backup folder, GitHub repo, and what to sync — are in `~/.claude/skills/import-export-claude-global-profile/config.yml`. You can customize any of them.
+
+> Would you like to review or change any settings before we proceed?
 
 ## Operation selection
 
@@ -75,7 +77,8 @@ Before running export or import, user wants to see what differences exist betwee
 
 ### Steps
 1. **Run:** `bash ~/.claude/skills/import-export-claude-global-profile/scripts/diff.sh`
-2. **Report** — Show the output verbatim in a code block, then summarize what it means.
+2. **Parse output** — Extract differences per item from script output.
+3. **Display summary table** — Build the table dynamically from script output. See [Summary table](#summary-table).
 
 ### What it uses from config
 `backup_folder`, `folders`, `files`, and `plugin_files` from `config.yml`.
@@ -93,7 +96,8 @@ User wants to back up their Claude Code settings.
    - **Merge sync (default):** Source items added/updated in backup. Items only in backup are preserved. Safer.
    - **Clean sync:** Backup made to exactly match source. Removes items not in source.
 3. **Run:** `bash ~/.claude/skills/import-export-claude-global-profile/scripts/export.sh [merge|clean]`
-4. **Report** — Share the output.
+4. **Parse output** — Extract synced items from script output (look for "Synced:" lines).
+5. **Display summary table** — See [Summary table](#summary-table) below.
 
 ### What gets exported
 Defined by `folders`, `files`, and `plugin_files` in `config.yml`. Defaults:
@@ -117,13 +121,66 @@ User wants to restore their Claude Code settings from the backup folder.
    - **Merge sync (default):** Backup items added/updated in ~/.claude/. Items only in ~/.claude/ are preserved.
    - **Clean sync:** ~/.claude/ made to exactly match backup. Removes items not in backup.
 3. **Run:** `bash ~/.claude/skills/import-export-claude-global-profile/scripts/import.sh [merge|clean]`
-4. **Report** — Share the output.
+4. **Parse output** — Extract restored items from script output (look for "Synced:" or "Restored:" lines).
+5. **Display summary table** — See [Summary table](#summary-table) below.
 
 ### What gets imported
 Defined by `folders`, `files`, and `plugin_files` in `config.yml`. Defaults match export above.
 
 ### GitHub
 If `github_repo` is set in config, import also pulls from GitHub first. If not, it's local-only.
+
+---
+
+## Summary table
+
+After export, import, or diff, parse the script output and display a table populated from the actual items returned.
+
+### Format
+
+```
+● {Operation} complete.
+
+  ┌─────────────────────────────────┬────────────────────┐
+  │              Item               │       Status       │
+  ├─────────────────────────────────┼────────────────────┤
+  │ {item from script output}        │ {status from script} │
+  └─────────────────────────────────┴────────────────────┘
+```
+
+### How to build it
+
+1. Parse each line of script output
+2. For each "Synced:", "Restored:", or "Removed:" line, extract the item path
+3. Determine the status:
+   - **Synced** / **Restored** — item was copied
+   - **Removed** — item was deleted (clean mode)
+   - **Identical** — no differences (diff)
+   - **Not in backup** / **Not local** — missing from one side (diff)
+   - **N changes** — has differences (diff, count them)
+4. Reconstruct the table with actual items from output
+5. For export: append "(local path)" to plugin JSON files
+6. For import: append "(global path)" to plugin JSON files
+
+### Example dynamic output
+
+```
+● Export complete.
+
+  ┌─────────────────────────────────┬────────────────────┐
+  │              Item               │       Status       │
+  ├─────────────────────────────────┼────────────────────┤
+  │ skills/                         │ Synced             │
+  ├─────────────────────────────────┼────────────────────┤
+  │ hooks/                          │ Synced             │
+  ├─────────────────────────────────┼────────────────────┤
+  │ settings.json                   │ Synced             │
+  ├─────────────────────────────────┼────────────────────┤
+  │ plugins/installed_plugins.json  │ Synced (local path) │
+  └─────────────────────────────────┴────────────────────┘
+```
+
+Always build the table from script output — do not use hardcoded item lists.
 
 ---
 
